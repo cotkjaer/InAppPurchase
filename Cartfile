@@ -1,0 +1,4 @@
+github "cotkjaer/Error"
+github "cotkjaer/Compare"
+github "cotkjaer/Notification"
+github "cotkjaer/UserInterface"

@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Notification
+import StoreKit
 
 // MARK: - Products Table View
 
@@ -42,62 +42,30 @@ public class ProductsTableViewCell: UITableViewCell
 
 // MARK: Controller
 
-public class ProductsTableViewController: UITableViewController, ProductsViewController
+public class ProductsTableViewController: UITableViewController
 {
-    let nhm = NotificationHandlerManager()
-    
-    public var productManager : ProductManager?
-        {
-        didSet
-        {
-            if oldValue != nil
-            {
-                nhm.deregisterAll()
-            }
-            
-            if let manager = productManager
-            {
-                nhm.onAny(from: manager) {
-                    self.refreshUI()
-                }
-            }
-            
-            productManager?.fetchProducts()
-            
-            updateData()
-            
-            refreshUI()
-        }
-    }
+    public var productIdentifiers = Set<String>() { didSet { updateData() } }
     
     public override func viewWillAppear(animated: Bool)
     {
         super.viewWillAppear(animated)
-        
         refreshUI()
     }
     
     // MARK: - data
     
-    var data = Array<Array<Product>>()
+    var data = Array<Array<ProductInfo>>()
     
     func updateData()
     {
-        if let sortedProducts = productManager?.products.sort( { $0.productIdentifier < $1.productIdentifier } )
-        {
-            data = [sortedProducts]
-        }
-        else
-        {
-            data = []
-        }
+        data = [productIdentifiers.sort().flatMap{ SKProduct.localizedInfoForProdutWithIdentifier($0) }]
+        tableView?.reloadData()
     }
     
-    func productForIndexPath(indexPath: NSIndexPath) -> Product?
+    func infoForIndexPath(indexPath: NSIndexPath) -> ProductInfo?
     {
         return data.get(indexPath.section)?.get(indexPath.item)
     }
-    
     
     // MARK: UITableViewDataSource
     
@@ -111,12 +79,7 @@ public class ProductsTableViewController: UITableViewController, ProductsViewCon
         return data.count
     }
     
-    private let CellReuseIdentifier = "ProductCell"
-    
-    func cellReuseIdentifierForProduct(product: Product) -> String
-    {
-        return product.productIdentifier + CellReuseIdentifier
-    }
+    private let CellReuseIdentifier = "Cell"
     
     func activityIndicator() -> UIActivityIndicatorView
     {
@@ -128,59 +91,68 @@ public class ProductsTableViewController: UITableViewController, ProductsViewCon
     
     override public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
-        if let product = productForIndexPath(indexPath)
+        guard let info = infoForIndexPath(indexPath) else { fatalError("could not get product info for indexPath \(indexPath)")}
+        
+        
+        guard let cell = tableView.dequeueReusableCellWithIdentifier(CellReuseIdentifier, forIndexPath: indexPath) as? ProductsTableViewCell else { fatalError("could not get cell with identifier \(CellReuseIdentifier)") }
+        
+        cell.textLabel?.text = info.title
+        cell.detailTextLabel?.text = info.description
+        
+        switch info.status
         {
-            let cellReuseIdentifier = cellReuseIdentifierForProduct(product)
+        case .Deferred:
+            cell.accessoryView = activityIndicator()
             
-            if let cell = tableView.dequeueReusableCellWithIdentifier(cellReuseIdentifier, forIndexPath: indexPath) as? ProductsTableViewCell
-            {
-                cell.textLabel?.text = product.localizedTitle
-                cell.detailTextLabel?.text = product.localizedDescription
-                
-                
-                switch product.purchaseStatus
-                {
-                case .Deferred:
-                    cell.accessoryView = activityIndicator()
-                    
-                case .Failed:
-                    cell.accessoryView = UILabel(text: NSLocalizedString("!", comment: "Purchase failed"), color: UIColor.redColor().darkerColor())
-                    
-                case .Purchased:
-                    cell.accessoryType = .Checkmark
-                    
-                case .Purchasing:
-                    cell.accessoryView = activityIndicator()
-                    
-                case .PendingFetch:
-                    cell.accessoryView = activityIndicator()
-                    
-                case .None:
-                    cell.accessoryView = UILabel(text: product.localizedPrice, color: UIColor.darkTextColor())
-                }
-                
-                return cell
-            }
+        case .Failed:
+            cell.accessoryView = UILabel(text: NSLocalizedString("!", comment: "Purchase failed"), color: UIColor.redColor().darkerColor())
             
-            fatalError("could not get product or cell with identifier \(cellReuseIdentifierForProduct(product))")
+        case .Purchased:
+            cell.accessoryType = .Checkmark
+            
+        case .Purchasing:
+            cell.accessoryView = activityIndicator()
+            
+            /*
+            case .PendingFetch:
+            cell.accessoryView = activityIndicator()
+            */
+            
+        case .None:
+            cell.accessoryView = UILabel(text: info.price, color: UIColor.darkTextColor())
         }
         
-        fatalError("could not get product or product for indexPath \(indexPath)")
+        return cell
     }
+    
     
     // MARK: UITableViewDelegate
     
     override public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
-        if let product = productForIndexPath(indexPath)
+        if let info = infoForIndexPath(indexPath)
         {
-            do
+            if let product = SKProduct.productWithIdentifier(info.identifier)
             {
-                try product.purchase()
+                product.purchase { ($0 as? NSError)?.presentAsAlert(); self.refreshUI(animated: true) }
             }
-            catch let error as NSError
+            else
             {
-                error.presentAsAlert()
+                SKProduct.fetchProducts(productIdentifiers)
+                    { (products, error) -> () in
+                        
+                        self.presentErrorAsAlert(error as? NSError)
+                        
+                        if let product = products.find({ $0.productIdentifier == info.identifier })
+                        {
+                            product.purchase {
+                                self.presentErrorAsAlert($0 as? NSError)
+                                self.refreshUI(animated: true)
+                            }
+                        }
+                        
+                        self.refreshUI(animated: true)
+                }
             }
         }
     }
@@ -202,8 +174,10 @@ public class ProductsTableViewController: UITableViewController, ProductsViewCon
     
     @IBAction func restorePurchasesButtonPressed()
     {
-        productManager?.restoreProducts()
-        refreshRestorePurchasesButton()
+        SKProduct.restoreProducts { (products, error) -> () in
+            self.presentErrorAsAlert(error as? NSError)
+            self.refreshUI(animated: true)
+        }
     }
     
     // MARK: - UI
@@ -216,7 +190,7 @@ public class ProductsTableViewController: UITableViewController, ProductsViewCon
     
     func refreshRestorePurchasesButton(animated animated: Bool = false)
     {
-        let enabled = productManager?.canRestore == true
+        let enabled = productIdentifiers.contains({ SKProduct.localizedInfoForProdutWithIdentifier($0).status != .Purchased })
         
         restorePurchasesButton?.enabled = enabled
         restorePurchasesBarButton?.enabled = enabled

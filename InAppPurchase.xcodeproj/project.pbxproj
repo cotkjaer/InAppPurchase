@@ -10,9 +10,6 @@
 		8FD874C11C761CEB00181FA6 /* InAppPurchase.h in Headers */ = {isa = PBXBuildFile; fileRef = 8FD874C01C761CEB00181FA6 /* InAppPurchase.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8FD874C81C761CEB00181FA6 /* InAppPurchase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FD874BD1C761CEB00181FA6 /* InAppPurchase.framework */; };
 		8FD874CD1C761CEB00181FA6 /* InAppPurchaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD874CC1C761CEB00181FA6 /* InAppPurchaseTests.swift */; };
-		8FD874D81C761D0100181FA6 /* ProductManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD874D71C761D0100181FA6 /* ProductManager.swift */; };
-		8FD874DA1C761D3F00181FA6 /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD874D91C761D3F00181FA6 /* Product.swift */; };
-		8FF1051D1C994ABC00A86025 /* NSUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF1051C1C994ABC00A86025 /* NSUserDefaults.swift */; };
 		8FF1051F1C994DD900A86025 /* Cartfile in Resources */ = {isa = PBXBuildFile; fileRef = 8FF1051E1C994DD900A86025 /* Cartfile */; };
 		8FF105251C99512100A86025 /* Arithmetic.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FF105201C99512100A86025 /* Arithmetic.framework */; };
 		8FF105261C99512100A86025 /* Collections.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FF105211C99512100A86025 /* Collections.framework */; };
@@ -26,6 +23,13 @@
 		8FF105331C99584100A86025 /* ProductsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF105321C99584100A86025 /* ProductsTableViewController.swift */; };
 		8FF105361C9958D700A86025 /* Compare.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FF105341C9958D700A86025 /* Compare.framework */; };
 		8FF105371C9958D700A86025 /* Notification.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FF105351C9958D700A86025 /* Notification.framework */; };
+		8FF105411C99BC1600A86025 /* ProductViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF105401C99BC1600A86025 /* ProductViewController.swift */; };
+		8FF105431C9A9D5E00A86025 /* ProductsFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF105421C9A9D5E00A86025 /* ProductsFetcher.swift */; };
+		8FF105451C9AA7D500A86025 /* ProductsRestorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF105441C9AA7D500A86025 /* ProductsRestorer.swift */; };
+		8FF105471C9AB13400A86025 /* ProductPurchaser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF105461C9AB13400A86025 /* ProductPurchaser.swift */; };
+		8FF105491C9ACA5500A86025 /* ProductsCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF105481C9ACA5500A86025 /* ProductsCache.swift */; };
+		8FF1054D1C9AEDEA00A86025 /* PaymentQueueHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF1054C1C9AEDEA00A86025 /* PaymentQueueHandler.swift */; };
+		8FF1054F1C9C04C000A86025 /* SKPaymentTransactionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FF1054E1C9C04C000A86025 /* SKPaymentTransactionState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,9 +49,6 @@
 		8FD874C71C761CEB00181FA6 /* InAppPurchaseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InAppPurchaseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8FD874CC1C761CEB00181FA6 /* InAppPurchaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppPurchaseTests.swift; sourceTree = "<group>"; };
 		8FD874CE1C761CEB00181FA6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8FD874D71C761D0100181FA6 /* ProductManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductManager.swift; sourceTree = "<group>"; };
-		8FD874D91C761D3F00181FA6 /* Product.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
-		8FF1051C1C994ABC00A86025 /* NSUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaults.swift; sourceTree = "<group>"; };
 		8FF1051E1C994DD900A86025 /* Cartfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
 		8FF105201C99512100A86025 /* Arithmetic.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Arithmetic.framework; path = Carthage/Build/iOS/Arithmetic.framework; sourceTree = "<group>"; };
 		8FF105211C99512100A86025 /* Collections.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Collections.framework; path = Carthage/Build/iOS/Collections.framework; sourceTree = "<group>"; };
@@ -61,6 +62,13 @@
 		8FF105321C99584100A86025 /* ProductsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductsTableViewController.swift; sourceTree = "<group>"; };
 		8FF105341C9958D700A86025 /* Compare.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Compare.framework; path = Carthage/Build/iOS/Compare.framework; sourceTree = "<group>"; };
 		8FF105351C9958D700A86025 /* Notification.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Notification.framework; path = Carthage/Build/iOS/Notification.framework; sourceTree = "<group>"; };
+		8FF105401C99BC1600A86025 /* ProductViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductViewController.swift; sourceTree = "<group>"; };
+		8FF105421C9A9D5E00A86025 /* ProductsFetcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductsFetcher.swift; sourceTree = "<group>"; };
+		8FF105441C9AA7D500A86025 /* ProductsRestorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductsRestorer.swift; sourceTree = "<group>"; };
+		8FF105461C9AB13400A86025 /* ProductPurchaser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductPurchaser.swift; sourceTree = "<group>"; };
+		8FF105481C9ACA5500A86025 /* ProductsCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProductsCache.swift; sourceTree = "<group>"; };
+		8FF1054C1C9AEDEA00A86025 /* PaymentQueueHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentQueueHandler.swift; sourceTree = "<group>"; };
+		8FF1054E1C9C04C000A86025 /* SKPaymentTransactionState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKPaymentTransactionState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,14 +126,18 @@
 		8FD874BF1C761CEB00181FA6 /* InAppPurchase */ = {
 			isa = PBXGroup;
 			children = (
-				8FD874D71C761D0100181FA6 /* ProductManager.swift */,
+				8FF105481C9ACA5500A86025 /* ProductsCache.swift */,
+				8FF105421C9A9D5E00A86025 /* ProductsFetcher.swift */,
+				8FF1054C1C9AEDEA00A86025 /* PaymentQueueHandler.swift */,
+				8FF105441C9AA7D500A86025 /* ProductsRestorer.swift */,
+				8FF105461C9AB13400A86025 /* ProductPurchaser.swift */,
+				8FF1052C1C9956F200A86025 /* ProductsViewController.swift */,
 				8FF105301C99578700A86025 /* ProductsCollectionViewController.swift */,
 				8FF105321C99584100A86025 /* ProductsTableViewController.swift */,
+				8FF105401C99BC1600A86025 /* ProductViewController.swift */,
 				8FF1052E1C99572E00A86025 /* UIViewController.swift */,
-				8FF1052C1C9956F200A86025 /* ProductsViewController.swift */,
 				8FF1052A1C99560500A86025 /* SKProduct.swift */,
-				8FD874D91C761D3F00181FA6 /* Product.swift */,
-				8FF1051C1C994ABC00A86025 /* NSUserDefaults.swift */,
+				8FF1054E1C9C04C000A86025 /* SKPaymentTransactionState.swift */,
 				8FD874C01C761CEB00181FA6 /* InAppPurchase.h */,
 				8FD874C21C761CEB00181FA6 /* Info.plist */,
 			);
@@ -250,14 +262,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8FD874D81C761D0100181FA6 /* ProductManager.swift in Sources */,
 				8FF1052B1C99560500A86025 /* SKProduct.swift in Sources */,
 				8FF1052F1C99572E00A86025 /* UIViewController.swift in Sources */,
 				8FF105311C99578700A86025 /* ProductsCollectionViewController.swift in Sources */,
-				8FD874DA1C761D3F00181FA6 /* Product.swift in Sources */,
+				8FF1054D1C9AEDEA00A86025 /* PaymentQueueHandler.swift in Sources */,
+				8FF105491C9ACA5500A86025 /* ProductsCache.swift in Sources */,
 				8FF105331C99584100A86025 /* ProductsTableViewController.swift in Sources */,
-				8FF1051D1C994ABC00A86025 /* NSUserDefaults.swift in Sources */,
+				8FF105411C99BC1600A86025 /* ProductViewController.swift in Sources */,
+				8FF105471C9AB13400A86025 /* ProductPurchaser.swift in Sources */,
+				8FF105451C9AA7D500A86025 /* ProductsRestorer.swift in Sources */,
+				8FF1054F1C9C04C000A86025 /* SKPaymentTransactionState.swift in Sources */,
 				8FF1052D1C9956F200A86025 /* ProductsViewController.swift in Sources */,
+				8FF105431C9A9D5E00A86025 /* ProductsFetcher.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

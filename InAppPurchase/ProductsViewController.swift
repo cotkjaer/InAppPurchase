@@ -6,11 +6,20 @@
 //  Copyright © 2016 Christian Otkjær. All rights reserved.
 //
 
-import Foundation
+import StoreKit
 
 // MARK: - Products View Controller
 
+public protocol ProductsViewControllerDelegate
+{
+    func productsControllerCancelled(controller: ProductsViewController)
+    
+    func productsController(controller: ProductsViewController, didPurchase product: SKProduct)
+    
+    func productsController(controller: ProductsViewController, didEncounterError: ErrorType)
+}
+
 public protocol ProductsViewController : class
 {
-    var productManager : ProductManager? { get set }
+    var productsDelegate : ProductsViewControllerDelegate? { get set }
 }

@@ -8,30 +8,32 @@
 
 import UIKit
 import UserInterface
+import StoreKit
+
+private let DefaultPurchaseCompletion : ((SKProduct, ErrorType?)->()) = { debugPrint("productIdentifier: \($0)", $1 == nil ? "" : " - \($1)") }
 
 extension UIViewController
 {
-    public func presentPurchaseAlert(productManager: ProductManager, productIdentifier: String, completion: (() -> ())?)
+    public func presentPurchaseAlert(
+        productIdentifier: String,
+        presentCompletion: (() -> ())? = nil,
+        purchaseCompletion: ((SKProduct, ErrorType?)->())? = DefaultPurchaseCompletion
+        )
     {
         let alert : UIAlertController
         
-        if let product = productManager.productWithIdentifier(productIdentifier)
+        if let product = SKProduct.productWithIdentifier(productIdentifier)
         {
+            guard product.purchaseStatus != .Purchased else { purchaseCompletion?(product, nil); return }
+            
             alert = UIAlertController(title: product.localizedTitle, message: product.localizedDescription, preferredStyle: .Alert)
             
             alert.addAction(UIAlertAction(title: product.localizedPrice, style: .Default, handler: { (action) -> Void in
                 
-                do
-                {
-                    try product.purchase()
-                }
-                catch let e as NSError
-                {
-                    e.presentAsAlert()
-                }
+                product.purchase({ purchaseCompletion?(product, $0) })
                 
             }))
-            
+
             alert.addAction(UIAlertAction(title: UIKitLocalizedString("Cancel"), style: .Cancel, handler: nil))
         }
         else
@@ -41,7 +43,7 @@ extension UIViewController
             alert.addAction(UIAlertAction(title: UIKitLocalizedString("Done"), style: .Cancel, handler: nil))
         }
         
-        presentViewController(alert, animated: true, completion: completion)
+        presentViewController(alert, animated: true, completion: presentCompletion)
     }
 }
 

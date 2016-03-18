@@ -8,6 +8,7 @@
 
 import UIKit
 import Notification
+import StoreKit
 
 // MARK: - Products Collection View
 
@@ -21,33 +22,9 @@ public class ProductsCollectionViewCell : UICollectionViewCell
     @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView?
 }
 
-public class ProductsCollectionViewController: UICollectionViewController, ProductsViewController
+public class ProductsCollectionViewController: UICollectionViewController//, ProductsViewController
 {
-    let nhm = NotificationHandlerManager()
-    
-    public var productManager : ProductManager?//(productIdentifiers: Set())
-        {
-        didSet
-        {
-            if oldValue != nil
-            {
-                nhm.deregisterAll()
-            }
-            
-            if let manager = productManager
-            {
-                nhm.onAny(from: manager) {
-                    self.refreshUI()
-                }
-            }
-            
-            productManager?.fetchProducts()
-            
-            updateData()
-            
-            refreshUI()
-        }
-    }
+    public var productIdentifiers = Set<String>() { didSet { updateData() } }
     
     public override func viewWillAppear(animated: Bool)
     {
@@ -57,155 +34,118 @@ public class ProductsCollectionViewController: UICollectionViewController, Produ
     
     // MARK: - data
     
-    var data = Array<Array<Product>>()
+    var data = Array<Array<ProductInfo>>()
     
     func updateData()
     {
-        if let sortedProducts = productManager?.products.sort( { $0.productIdentifier < $1.productIdentifier } )
-        {
-            data = [sortedProducts]
-        }
-        else
-        {
-            data = []
-        }
+        data = [productIdentifiers.sort().flatMap{ SKProduct.localizedInfoForProdutWithIdentifier($0) }]
+        collectionView?.reloadData()
     }
     
-    
-    func productForIndexPath(indexPath: NSIndexPath) -> Product?
+    func infoForIndexPath(indexPath: NSIndexPath) -> ProductInfo?
     {
         return data.get(indexPath.section)?.get(indexPath.item)
     }
     
-    
     // MARK: UICollectionViewDataSource
     
-    override public func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+    override public func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int
+    {
         return 1
     }
     
-    
-    override public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    override public func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int
+    {
         return data.count
     }
     
     private let CellReuseIdentifier = "ProductCell"
     
-    func cellReuseIdentifierForProduct(product: Product) -> String
-    {
-        return product.productIdentifier + CellReuseIdentifier
-    }
-    
     override public func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell
     {
-        if let product = productForIndexPath(indexPath)
-        {
-            if let cell = collectionView.dequeueReusableCellWithReuseIdentifier(cellReuseIdentifierForProduct(product), forIndexPath: indexPath) as? ProductsCollectionViewCell
-            {
-                cell.titleLabel?.text = product.localizedTitle
-                cell.detailLabel?.text = product.localizedDescription
-                
-                var color = UIColor.darkTextColor()
-                
-                switch product.purchaseStatus
-                {
-                case .Deferred:
-                    cell.statusLabel?.text = nil//NSLocalizedString("Purchasing", comment:"Purchase deferred")
-                    cell.activityIndicatorView?.startAnimating()
-                    
-                case .Failed:
-                    cell.statusLabel?.text = NSLocalizedString("!", comment: "Purchase failed")
-                    color = UIColor.redColor().darkerColor()
-                    cell.activityIndicatorView?.stopAnimating()
-                    
-                case .Purchased:
-                    cell.statusLabel?.text = NSLocalizedString("✓", comment: "Purchased")
-                    color = UIColor.greenColor().darkerColor()
-                    cell.activityIndicatorView?.stopAnimating()
-                    
-                    
-                case .Purchasing:
-                    cell.statusLabel?.text = nil//NSLocalizedString("Purchasing", comment: "")
-                    cell.activityIndicatorView?.startAnimating()
-                    
-                    
-                case .PendingFetch:
-                    cell.titleLabel?.text = nil
-                    cell.detailLabel?.text = nil
-                    cell.statusLabel?.text = nil //NSLocalizedString("Fetching", comment: "")
-                    cell.activityIndicatorView?.startAnimating()
-                    
-                case .None:
-                    cell.statusLabel?.text = product.localizedPrice
-                    cell.activityIndicatorView?.stopAnimating()
-                    
-                    color = view.tintColor
-                }
-                
-                //            cell.statusLabel?.textColor = color
-                
-                cell.layer.borderColor = color.CGColor
-                cell.titleLabel?.backgroundColor = color
-                cell.titleLabel?.textColor = UIColor.whiteColor()
-                cell.statusLabel?.backgroundColor = color
-                cell.statusLabel?.textColor = UIColor.whiteColor()
-                
-                return cell
-            }
+        guard
+            let info = infoForIndexPath(indexPath)
             
-            fatalError("could not get product or cell with identifier \(cellReuseIdentifierForProduct(product))")
+            else
+        {
+            fatalError("could not get product for indexPath \(indexPath)")
         }
         
-        fatalError("could not get product or product for indexPath \(indexPath)")
+        guard let cell = collectionView.dequeueReusableCellWithReuseIdentifier(CellReuseIdentifier, forIndexPath: indexPath) as? ProductsCollectionViewCell
+            else
+        {
+            fatalError("could not get cell with identifier \(CellReuseIdentifier)")
+        }
+        
+        cell.titleLabel?.text = info.title
+        cell.detailLabel?.text = info.description
+        
+        var color = UIColor.darkTextColor()
+        
+        switch info.status
+        {
+        case .Deferred:
+            cell.statusLabel?.text = nil//NSLocalizedString("Deferred", comment:"Purchase deferred")
+            cell.activityIndicatorView?.startAnimating()
+            
+        case .Failed:
+            cell.statusLabel?.text = NSLocalizedString("!", comment: "Purchase failed")
+            color = UIColor.redColor().darkerColor()
+            cell.activityIndicatorView?.stopAnimating()
+            
+        case .Purchased:
+            cell.statusLabel?.text = NSLocalizedString("✓", comment: "Purchased")
+            color = UIColor.greenColor().darkerColor()
+            cell.activityIndicatorView?.stopAnimating()
+            
+            
+        case .Purchasing:
+            cell.statusLabel?.text = nil//NSLocalizedString("Purchasing", comment: "")
+            cell.activityIndicatorView?.startAnimating()
+            
+            /*
+        case .PendingFetch:
+            cell.titleLabel?.text = nil
+            cell.detailLabel?.text = nil
+            cell.statusLabel?.text = nil //NSLocalizedString("Fetching", comment: "")
+            cell.activityIndicatorView?.startAnimating()
+            */
+            
+        case .None:
+            cell.statusLabel?.text = info.price
+            cell.activityIndicatorView?.stopAnimating()
+            
+            color = view.tintColor
+        }
+        
+        cell.layer.borderColor = color.CGColor
+        cell.titleLabel?.backgroundColor = color
+        cell.titleLabel?.textColor = UIColor.whiteColor()
+        cell.statusLabel?.backgroundColor = color
+        cell.statusLabel?.textColor = UIColor.whiteColor()
+        
+        return cell
     }
     
     // MARK: UICollectionViewDelegate
-    
+
     override public func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath)
     {
         collectionView.deselectItemAtIndexPath(indexPath, animated: true)
         
-        if let product = productForIndexPath(indexPath)
+        if let info = infoForIndexPath(indexPath), let product = SKProduct.productWithIdentifier(info.identifier)
         {
-            do
-            {
-                try product.purchase()
-            }
-            catch let e as NSError
-            {
-                e.presentAsAlert()
-            }
+            product.purchase { ($0 as? NSError)?.presentAsAlert() }
         }
     }
     
-    /*
-    // Uncomment this method to specify if the specified item should be highlighted during tracking
-    override func collectionView(collectionView: UICollectionView, shouldHighlightItemAtIndexPath indexPath: NSIndexPath) -> Bool {
-    return true
-    }
-    */
+    // MARK: - UI
     
-    /*
-    // Uncomment this method to specify if the specified item should be selected
-    override func collectionView(collectionView: UICollectionView, shouldSelectItemAtIndexPath indexPath: NSIndexPath) -> Bool {
-    return true
+    func refreshUI(animated animated: Bool = false)
+    {
+        refreshCollectionView(animated: animated)
+        refreshRestorePurchasesButton(animated: animated)
     }
-    */
-    
-    /*
-    // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-    override func collectionView(collectionView: UICollectionView, shouldShowMenuForItemAtIndexPath indexPath: NSIndexPath) -> Bool {
-    return false
-    }
-    
-    override func collectionView(collectionView: UICollectionView, canPerformAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject?) -> Bool {
-    return false
-    }
-    
-    override func collectionView(collectionView: UICollectionView, performAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject?) {
-    
-    }
-    */
     
     // MARK: - Cancel Button
     
@@ -217,7 +157,6 @@ public class ProductsCollectionViewController: UICollectionViewController, Produ
         presentingViewController?.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    
     // MARK: - Restore Button
     
     @IBOutlet weak var restorePurchasesBarButton: UIBarButtonItem?
@@ -225,21 +164,15 @@ public class ProductsCollectionViewController: UICollectionViewController, Produ
     
     @IBAction func restorePurchasesButtonPressed()
     {
-        productManager?.restoreProducts()
-        refreshRestorePurchasesButton()
-    }
-    
-    // MARK: - UI
-    
-    func refreshUI(animated animated: Bool = false)
-    {
-        refreshCollectionView(animated: animated)
-        refreshRestorePurchasesButton(animated: animated)
+        SKProduct.restoreProducts { (products, error) -> () in
+            self.presentErrorAsAlert(error as? NSError)
+            self.refreshRestorePurchasesButton()
+        }
     }
     
     func refreshRestorePurchasesButton(animated animated: Bool = false)
     {
-        let enabled = productManager?.canRestore == true
+        let enabled = productIdentifiers.contains({ SKProduct.localizedInfoForProdutWithIdentifier($0).status != .Purchased })
         
         restorePurchasesButton?.enabled = enabled
         restorePurchasesBarButton?.enabled = enabled
@@ -248,6 +181,18 @@ public class ProductsCollectionViewController: UICollectionViewController, Produ
     // TODO: update animated
     func refreshCollectionView(animated animated: Bool = false)
     {
-        self.collectionView?.reloadData()
+        if let collectionView = collectionView
+        {
+            let paths = collectionView.indexPathsForVisibleItems()
+            
+            if paths.isEmpty
+            {
+                collectionView.reloadData()
+            }
+            else
+            {
+                collectionView.performBatchUpdates({ collectionView.reloadItemsAtIndexPaths(paths) })
+            }
+        }
     }
 }
